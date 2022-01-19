@@ -17,7 +17,7 @@ from user_modules import update_db
 packed_file_types = ["CDFV2 Encrypted"]
 good_file_types = ["Composite Document File V2 Document"]
 
-with open("./configs/config.json", "r") as fh:
+with open("../configs/config.json", "r") as fh:
     config = yaml.load(fh, Loader=yaml.FullLoader)
 
 PATH_TO_TEMP = "/tmp/"

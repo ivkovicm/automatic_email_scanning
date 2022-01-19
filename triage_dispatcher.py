@@ -88,13 +88,6 @@ class EMAILServer(SMTPServer):
         self.save_file(mail_hash)
 
 
-
-
-
-
-
-
-
 def send_to_analysis(mssg):
     global config
     mq_hostname = config["RabbitMQ"]["Hostname"]
@@ -113,7 +106,6 @@ def send_to_analysis(mssg):
 
 def return_mail():
     pass
-
 
 def init_smtp():
     global config
