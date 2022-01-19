@@ -1,0 +1,39 @@
+{
+  "SMTPServer":
+  {
+    "Local_IP": "",
+    "Local_Port": 1024,
+    "Remote_IP": "",
+    "Remote_Port": 25,
+    "Eml_Path": "/tmp/",
+    "Manual_Check": "/tmp/need_manual_view/"
+  },
+  "DataBase":
+  {
+    "Type": "sql",
+    "Hostname": "localhost",
+    "port": 0,
+    "User": "change_me",
+    "Password": "change_me",
+    "DB_name": "change_me"
+  },
+  "RabbitMQ":
+  {
+    "Hostname": "localhost",
+    "Port": 0,
+    "Queue":
+    {
+      "Analysis": "Analysis",
+      "Result": "Result",
+      "Manual": "Manual",
+      "Error": "Error",
+      "Cracker": "Cracker"
+    }
+  },
+  "ID_Score":
+  {
+    "Malicious": 4,
+    "Suspicious": 2,
+    "Other": 0
+  }
+}
