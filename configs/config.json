@@ -10,7 +10,7 @@
   },
   "DataBase":
   {
-    "Type": "sql",
+    "Type": "psql",
     "Hostname": "localhost",
     "port": 0,
     "User": "change_me",
@@ -35,5 +35,22 @@
     "Malicious": 4,
     "Suspicious": 2,
     "Other": 0
+  },
+  "Logging":
+  {
+    "On_Off": "On",
+    "File": "",
+    "Level": "",
+    "SysLog_IP": "",
+    "SysLOG_PORT": ""
+  },
+  "AnalysisPlugins":
+  {
+    "VBA_Analyzer":
+    {
+      "On_Off": "On",
+      "Plugin": "VBA",
+      "temp_folder": "/tmp/"
+    }
   }
 }

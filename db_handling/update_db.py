@@ -1,57 +1,67 @@
 import psycopg2
 from enum import Enum
+from other import custom_errors, custom_types
 
-conn_object = psycopg2.connection
+conn_object = None
 
 
-def verdict_field_to_enum(argument):
+class ConnectionObject:
+    def __init__(self, config):
+        self.db_host = config["DataBase"]["Hostname"]
+        self.db_port = config["DataBase"]["Port"]
+        self.db_name = config["DataBase"]["DB_name"]
+        self.db_user = config["DataBase"]["User"]
+        self.db_password = config["DataBase"]["Password"]
+        self.dsn = ""
+        self.object = psycopg2.connection
+        self.check_if_all_entries_populated()
+        self.set_dsn()
+
+    def check_if_all_entries_populated(self) -> None:
+        if self.db_host == "" or self.db_name == "" or self.db_user == "" or self.db_password == "":
+            raise ConfigurationNotSet
+        elif self.db_port == "":
+            self.db_port = 0
+
+    def set_dsn(self) -> None:
+        if self.db_port == 0:
+            self.dsn = "host={} dbname={} user={} password={}".format(self.db_host, self.db_name, self.db_user,
+                                                                      self.db_password)
+        else:
+            self.dsn = "host={} port={} dbname={} user={} password={}".format(self.db_host, self.db_port, self.db_name,
+                                                                              self.db_user, self.db_password)
+
+
+def verdict_field_to_enum(argument) -> SQL:
     switcher = {
         "MALICIOUS": SQL.SQL_ENTRY_MALICIOUS,
-        "SUSPICIOSU": SQL.SQL_ENTRY_SUSPICIOSU,
+        "SUSPICIOUS": SQL.SQL_ENTRY_SUSPICIOUS,
         "GOODWARE": SQL.SQL_ENTRY_GOODWARE,
     }
     return switcher.get(argument, SQL.SQL_STRANGE_RECORDS)
 
 
-class SQL(Enum):
-    SQL_NO_ENTRY = 0
-    SQL_EXISTS = 1
-    SQL_STRANGE_RECORDS = 2
-    SQL_ENTRY_MALICIOUS = 3
-    SQL_ENTRY_SUSPICIOS = 4
-    SQL_ENTRY_GOODWARE = 5
-    SQL_ERROR_CONNECTION_TYPE = 6
-    SQL_ERROR_NO_CONNECTION = 7
-    SQL_OK = 8
-
-
-def init_connection(config):
-    if config["DataBase"]["Type"] == "sql":
+def init_connection(config) -> SQL:
+    if config["DataBase"]["Type"] == "psql":
         connect_to_db(config)
     else:
-        raise Exception(SQL.SQL_ERROR_CONNECTION_TYPE, "Didn't find connection type!")
+        raise ConfigurationNotSet
+
     return SQL.SQL_OK
 
 
-def connect_to_db(config):
+def connect_to_db(config) -> SQL:
     global conn_object
-    db_host = config["DataBase"]["Hostname"]
-    db_port = config["DataBase"]["Port"]
-    db_name = config["DataBase"]["DB_name"]
-    db_user = config["DataBase"]["User"]
-    db_password = config["DataBase"]["Password"]
-    if db_port == 0:
-        dsn = "host={} dbname={} user={} password={}".format(db_host, db_name, db_user, db_password)
-    else:
-        dsn = "host={} port={} dbname={} user={} password={}".format(db_host, db_port, db_name, db_user, db_password)
+    conn_object = ConnectionObject(config)
     try:
-        conn_object = psycopg2.connect(dsn)
+        conn_object = psycopg2.connect(conn_object.dsn)
     except:
-        raise Exception(SQL.SQL_ERROR_NO_CONNECTION, "Can't connect to DB")
+        raise PostgreSQLconnectionError("connecting to" + str(conn_object.db_host) + ":" + str(conn_object.db_port))
+
     return SQL.SQL_OK
 
 
-def fetch_verdict(config, your_hash: str):
+def fetch_verdict(config, your_hash: str) -> SQL:
     global conn_object
     init_connection(config)
     db_name = config["DataBase"]["DB_name"]
@@ -72,7 +82,7 @@ def fetch_verdict(config, your_hash: str):
         return verdict_field_to_enum(cur[1])
 
 
-def update_db_entry(config, your_hash: str, verdict: str):
+def update_db_entry(config, your_hash: str, verdict: str) -> None:
     global conn_object
     init_connection(config)
     db_name = config["DataBase"]["DB_name"]
@@ -84,11 +94,12 @@ def update_db_entry(config, your_hash: str, verdict: str):
     conn_object.close()
 
 
-def create_row_in_db(config, your_hash: str, file_type: str, verdict: str):
+def create_row_in_db(config, your_hash: str, file_type: str, verdict: str) -> None:
     global conn_object
     init_connection(config)
     db_name = config["DataBase"]["DB_name"]
-    create_sql = "INSERT INTO " + db_name + "(HASH512,FILE_TYPE,COUNTER,VERDICT) VALUES('" + your_hash + "','" + file_type + "'," + str(1) + ",'" + verdict + "'"
+    create_sql = "INSERT INTO " + db_name + "(HASH512,FILE_TYPE,COUNTER,VERDICT) VALUES('" + your_hash + "','" + file_type + "'," + str(
+        1) + ",'" + verdict + "'"
     cur = conn_object.cursor()
     cur.execute(create_sql)
     conn_object.commit()
