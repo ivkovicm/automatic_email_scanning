@@ -16,16 +16,37 @@ class MessageParsingError(Exception):
         super().__init__("Error with message {}!".format(filename))
 
 
-class ERROR(Enum):
-    ERROR_OK = 0
-    ERROR_ERROR = -1
-    ERROR_BODY_PARSING = 1 << 0
-    ERROR_FILE_SAVING = 1 << 1
-    ERROR_FILE_MAGIC = 1 << 2
-    ERROR_OPEN_VBA = 1 << 3
-    ERROR_PROCESSING_VBA = 1 << 4
-    ERROR_PARSING_VBA = 1 << 5
-    ERROR_DETECTING_MACRO = 1 << 6
-    ERROR_ANALYSING_MACRO = 1 << 7
-    ERROR_PREPARING_REPORT = 1 << 8
-    ERROR_TRANSFORMING_REPORT = 1 << 9
+# VBA Analysis plug-in errors
+class VBAVerdictError(Exception):
+    def __init__(self, filename):
+        super().__init__("Error while giving verdict to file {}!".format(filename))
+
+
+class VBAAnalysisError(Exception):
+    pass
+
+
+class VBACreateReport(Exception):
+    pass
+
+
+class VBADetectMacro(Exception):
+    pass
+
+
+class VBASaveToFile(Exception):
+    pass
+
+
+class VBAParsing(Exception):
+    pass
+
+
+class VBASaveToDisk(Exception):
+    pass
+
+
+# Errors for other files
+
+class ConvertToCSVError(Exception):
+    pass
