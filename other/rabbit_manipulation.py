@@ -49,6 +49,7 @@ class RabbitObject:
         self.connection.close()
 
     def send_to_manual(self, mssg: str) -> None:
+        self.connect()
         go_over = False
         manual_channel = None
         try:
@@ -56,8 +57,32 @@ class RabbitObject:
             manual_channel.queue_declare(queue=self.manual_queue, durable=True)
         except ValueError:
             logging.error("Error while sending message to error queue!")
-            logging.error("\t" + mssg)
+            logging.error(mssg)
             go_over = True
-        if go_over:
+        if not go_over:
             manual_channel.basic_publish(exchange='', routing_key=self.manual_queue, body=mssg)
             manual_channel.close()
+
+    def send_to_analysis(self, mssg) -> None:
+        self.connect()
+        analysis_channel = None
+        try:
+            analysis_channel = self.connection.channel()
+            analysis_channel.queue_declare(queue=self.analysis_queue, durable=True)
+        except ValueError:
+            logging.error("Error while sending message to analysis queue!")
+            logging.error(mssg)
+        analysis_channel.basic_publish(exchange='', routing_key=self.analysis_queue, body=mssg)
+        analysis_channel.close()
+
+    def send_to_error(self, mssg) -> None:
+        self.connect()
+        error_channel = None
+        try:
+            error_channel = self.connection.channel()
+            error_channel.queue_declare(queue=self.error_queue, durable=True)
+        except ValueError:
+            logging.error("Error while sending message to error queue!")
+            logging.error(mssg)
+        error_channel.basic_publish(exchange='', routing_key=self.error_queue, body=mssg)
+        error_channel.close()
