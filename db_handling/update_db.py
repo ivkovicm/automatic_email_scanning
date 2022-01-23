@@ -32,7 +32,7 @@ class ConnectionObject:
                                                                               self.db_user, self.db_password)
 
     @staticmethod
-    def verdict_field_to_enum(argument) -> SQL:
+    def verdict_field_to_enum(argument) -> custom_types.SQL:
         switcher = {
             "MALICIOUS": custom_types.SQL.SQL_ENTRY_MALICIOUS,
             "SUSPICIOUS": custom_types.SQL.SQL_ENTRY_SUSPICIOUS,
@@ -47,20 +47,26 @@ class ConnectionObject:
             raise ConfigurationNotSet
 
     def close_connection(self) -> None:
-        try:
-            self.conn_object.close()
-        except:
-            raise PostgreSQLconnectionError(
-                "closing connection to" + str(conn_object.db_host) + ":" + str(conn_object.db_port))
+        if self.db_type == "psql":
+            try:
+                self.conn_object.close()
+            except:
+                raise PostgreSQLconnectionError(
+                    "closing connection to" + str(self.conn_object.db_host) + ":" + str(self.conn_object.db_port))
+        else:
+            pass
 
     def connect_to_db(self) -> None:
-        try:
-            self.conn_object = psycopg2.connect(conn_object.dsn)
-        except:
-            raise PostgreSQLconnectionError("connecting to" + str(conn_object.db_host) + ":" + str(conn_object.db_port))
+        if self.db_type == "psql":
+            try:
+                self.conn_object = psycopg2.connect(self.dsn)
+            except:
+                raise PostgreSQLconnectionError("connecting to" + str(self.conn_object.db_host) + ":" + str(self.conn_object.db_port))
+        else:
+            pass
 
     def fetch_verdict(self, your_hash: str) -> custom_types.SQL:
-        self.init_connection(config)
+        self.init_connection()
         query_sql = 'SELECT SHA512, VERDICT from ' + self.db_name + ' where SHA512=="' + your_hash + '"'
         cur = self.conn_object.cursor()
         cur.execute(query_sql)
