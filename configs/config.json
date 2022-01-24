@@ -1,10 +1,8 @@
 {
   "SMTPServer":
   {
-    "Local_IP": "",
-    "Local_Port": 1024,
-    "Remote_IP": "",
-    "Remote_Port": 25,
+    "Ingress_Port": 1024,
+    "Egress_Port": 25,
     "Eml_Path": "/tmp/",
     "Manual_Check": "/tmp/need_manual_view/"
   },
