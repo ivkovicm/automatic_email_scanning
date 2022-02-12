@@ -11,37 +11,11 @@ import threading
 from other import config_loader, custom_types, custom_errors, rabbit_manipulation, loger_setup
 
 
-class MailConfigurations:
-    def __init__(self, config: dict):
-        self.email_path = ""
-        self.manual_dir = ""
-        self.ingress_port = ""
-        self.egress_port = ""
-        self.parse_config(config)
-
-    def parse_config(self, config) -> None:
-        self.email_path = config["SMTPServer"]["Eml_Path"]
-        self.manual_dir = config["SMTPServer"]["Manual_Check"]
-        self.ingress_port = config["SMTPServer"]["Ingress_Port"]
-        self.egress_port = config["SMTPServer"]["Egress_Port"]
-        self.check_config()
-
-    def check_config(self) -> None:
-        if self.ingress_port == "" or self.egress_port == "":
-            logging.critical("Error in configuration file (check SMTP IPs and PORTs)!")
-            raise custom_errors.SMTPConfigError
-        elif self.email_path == "" or self.manual_dir == "":
-            logging.critical("Error in configuration file (check SMTP mails folder path)!")
-            raise custom_errors.SMTPConfigError
-        elif not os.path.isdir(self.email_path) or not os.path.isdir():
-            logging.critical("SMTP directories for saving mails doesn't exist!")
-            raise custom_errors.SMTPMailDirsError
-
-
 class EmailReceiver(SMTPServer):
-    def __init__(self, config: MailConfigurations):
-        self.config = config
-        super(EMAILServer, self).__init__(("127.0.0.1", self.config.ingress_port), None)
+    def __init__(self, config: dict):
+        self.mail_config = mail_config
+        self.rabbit_config = rabbit_manipulation.RabbitConfig(config)
+        super(EMAILServer, self).__init__((self.mail_config.ingress_ip, self.mail_config.ingress_port), None)
 
     def process_message(self, peer, mailfrom, rcpttos, data, decode_data=False):
 
@@ -53,7 +27,7 @@ class EmailReceiver(SMTPServer):
             recipient.replace("\'", "")
 
         mail_hash = self.calculate_hash(data)
-        self.save_file(mail_hash)
+        file_handling.save_file(self.config.email_path + mail_hash)
 
 
 def calculate_hash(data) -> str:
@@ -67,12 +41,8 @@ def calculate_hash(data) -> str:
     return hash_module.hexdigest()
 
 
-def return_mail():
-    pass
-
-
-def init_smtp():
-    mail_server = EMAILServer()
+def main(config: dict):
+    mail_server = EMAILServer(config)
     try:
         asyncore.loop()
     except KeyboardInterrupt:
@@ -94,7 +64,6 @@ def init_smtp():
 
 if __name__ == "__main__":
     config = config_loader.load_config()
-    mail_config = MailConfigurations(config)
     loger_setup.init_logging(config)
-
-    init_smtp()
+    mail_config = custom_types.MailConfigurations(config)
+    main()

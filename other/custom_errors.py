@@ -7,8 +7,7 @@ class PostgreSQLconnectionError(Exception):
 
 
 class ConfigurationNotSet(Exception):
-    def __init__(self):
-        super().__init__("Check if your DataBase configuration is set in configs/config.json!")
+    pass
 
 
 class MessageParsingError(Exception):

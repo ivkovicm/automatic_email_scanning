@@ -2,9 +2,16 @@
   "SMTPServer":
   {
     "Ingress_Port": 1024,
+    "Ingress_IP": "",
+    "Eml_Path": "/tmp/"
+  },
+  "SMTPClient":
+  {
     "Egress_Port": 25,
+    "Egress_IP": "",
     "Eml_Path": "/tmp/",
-    "Manual_Check": "/tmp/need_manual_view/"
+    "Manual_Path": "/tmp/need_manual_view/",
+    "Quarantine_Path": "/tmp/quarantine/"
   },
   "DataBase":
   {
@@ -25,7 +32,8 @@
       "Result": "Result",
       "Manual": "Manual",
       "Error": "Error",
-      "Cracker": "Cracker"
+      "Cracker": "Cracker",
+      "Verdict": "Verdict"
     }
   },
   "ID_Score":

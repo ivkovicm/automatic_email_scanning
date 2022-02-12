@@ -30,7 +30,7 @@ class VERDICT(Enum):
     GOODWARE = 0
     SUSPICIOUS = 1
     MALICIOUS = 2
-    MANUAL = 666
+    MANUAL = 3
 
 
 class VBA_MACRO(Enum):
